@@ -25,7 +25,7 @@ class LedDebugger:
     def failed(self):
         self._blink_red()
         self._off()
-        sleep(0,5)
+        sleep(0.5)
         self._blink_red()
 
     def success(self):
