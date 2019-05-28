@@ -24,16 +24,19 @@ class LedDebugger:
 
     async def failed(self):
         self._blink_red()
+        self._off()
         sleep(1)
         self._blink_red()
 
     async def success(self):
         self._blink_green()
+        self._off()
         sleep(1)
         self._blink_green()
 
     async def neutral(self):
         self._blink_blue()
+        self._off()
         sleep(1)
         self._blink_blue()
 
@@ -41,16 +44,18 @@ class LedDebugger:
         GPIO.output(self.red, COLOR_ON)
         GPIO.output(self.green, COLOR_OFF)
         GPIO.output(self.blue, COLOR_OFF)
-        GPIO.cleanup()
 
     def _blink_green(self):
         GPIO.output(self.red, COLOR_OFF)
         GPIO.output(self.green, COLOR_ON)
         GPIO.output(self.blue, COLOR_OFF)
-        GPIO.cleanup()
 
     def _blink_blue(self):
         GPIO.output(self.red, COLOR_OFF)
         GPIO.output(self.green, COLOR_OFF)
         GPIO.output(self.blue, COLOR_ON)
-        GPIO.cleanup()
+
+    def _off(self):
+        GPIO.output(self.red, COLOR_OFF)
+        GPIO.output(self.green, COLOR_OFF)
+        GPIO.output(self.blue, COLOR_OFF)
