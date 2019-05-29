@@ -1,4 +1,8 @@
 import socket
+import requests
+import json
+import inotify
+
 from time import sleep
 from getmac import get_mac_address
 
@@ -44,4 +48,29 @@ def start_server(host, port):
             msg = str(buffer)
             print(f'Received {msg} from {addr}')
             conn.sendall(str.encode(str(200)))
+
+"""
+Send data to the API.
+"""
+def send_data(url: str, token: str, data: dict):
+    payload = {'token': token}
+    msg = json.dumps(data)
+    response = requests.post(url, data=payload, json=msg)
     
+    return response.status
+
+
+"""
+Watch for new collects and send to the API.
+"""
+def watch_for_collects(directory: str):
+    i = inotify.adapters.Inotify()
+
+    i.add_watch(directory)
+
+    for event in i.event_gen():
+        if event:
+            event_type = event[1]
+            if event_type[0] == 'IN_CLOSE_WRITE':
+                print('path ' + event[2])
+                print('name ' + event[3])
