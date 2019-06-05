@@ -26,7 +26,7 @@ def main():
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
 
-        ws_url = f'ws://{args.host}/ws/?mac={mac_addr}'
+        ws_url = 'ws://' + args.host + '/ws/?mac=' + mac_addr
         print('ws ', ws_url) 
         connection = WSConnection(ws_url, args.interface)
         connection.start_connection()

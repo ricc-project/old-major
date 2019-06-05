@@ -49,7 +49,7 @@ class WSConnection:
         self.socket.send(self.SWITCH_SUCCESS)
 
     def _on_error(self, error):
-        print(f'Error "{error}"')
+        print('Error "' + error + '"')
         sleep(5)
         print('Retrying')
         self.start_connection()
