@@ -16,7 +16,7 @@ def main():
                         nargs='?', default='eth0')
 
     parser.add_argument('directory', type=str, help='directory where sensor data is saved',
-                        nargs='?', default='~/ricc/data')
+                        nargs='?', default='/home/ricc/data')
     
     args = parser.parse_args()
 
@@ -30,9 +30,9 @@ def main():
         http_url = 'http://' + args.host
         print('ws ', ws_url)
         print('http ', http_url)
-        signup(http_url+'/sign_central', mac_addr)
+        signup(http_url+'/sign_central/', mac_addr)
         connection = WSConnection(ws_url, args.interface)
         connection.start_connection()
-        monitor(args.directory, (http_url + '/call'), mac_addr)
+        monitor(args.directory, (http_url + '/call/'), mac_addr)
     else:
         print("Invalid internet interface, couldn't get device mac address")

@@ -7,7 +7,7 @@ import threading
 from time import sleep
 from getmac import get_mac_address
 
-from .led_debugger import LedDebugger
+from .led_Debugger import LedDebugger
 
 DEBUG = LedDebugger()
 
@@ -106,7 +106,8 @@ def watch_for_collects(directory: str):
 Constantly makes get requests to get token
 """
 def get_token(url: str, mac_addr: str):
-    payload = {'mac': mac_addr}
+    formated_mac = mac_addr.replace(':', '-')
+    payload = {'mac': formated_mac}
     response = requests.get(url, params=payload)
 
     while response.status_code != 200:
@@ -114,18 +115,24 @@ def get_token(url: str, mac_addr: str):
         sleep(10)
         response = requests.get(url, params=payload)
     
-    DEBUG.neutral
+    DEBUG.neutral()
     sleep(1)
     f = open('/home/ricc/token', 'w')
     f.write(response.text)
-    DEBUG.success
+    DEBUG.success()
 
 
 """
 Let the server know the central is online
 """
 def signup(url: str, mac_addr: str):
+    headers = {"content-type": "application/json"}
     msg = json.dumps({'mac_address': mac_addr})
-    response = requests.post(url, json=msg)
+    response = requests.post(url, data=msg, headers=headers)
+    
+    if response.status_code == 201:
+        DEBUG.neutral()
+        sleep(1)
+        DEBUG.success()
 
     return response
