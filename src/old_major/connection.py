@@ -7,6 +7,9 @@ import threading
 from time import sleep
 from getmac import get_mac_address
 
+from . import LedDebugger
+
+DEBUG = LedDebugger()
 
 class WSConnection:
 
@@ -42,20 +45,26 @@ class WSConnection:
     
     def _on_open(self):
         print('Connected')
+        DEBUG.success()
 
     def _on_message(self, message):
         print('Switching actuator')
+        DEBUG.neutral()
+        sleep(1)
         self._switch_actuator()
         self.socket.send(self.SWITCH_SUCCESS)
+        DEBUG.success()
 
     def _on_error(self, error):
         print('Error "' + error + '"')
+        DEBUG.failed()
         sleep(5)
         print('Retrying')
         self.start_connection()
 
     def _on_close(self):
         print("Connection lost")
+        DEBUG.failed()
         sleep(5)
         print('Trying to stabilish connection')
         self.start_connection()
@@ -71,6 +80,12 @@ def send_http_data(url: str, token: str, data: dict):
     
     return response.status
 
+def monitor(directory, url, mac_addr):
+    watch_thread = threading.Thread(target=watch_for_collects, args=(directory,))    
+    token_thread = threading.Thread(target=get_token, args=(url, mac_addr))
+    
+    watch_thread.start()
+    token_thread.start()
 
 """
 Watch for new collects and send to the API.
@@ -86,3 +101,18 @@ def watch_for_collects(directory: str):
             if event_type[0] == 'IN_CLOSE_WRITE':
                 print('path ' + event[2])
                 print('name ' + event[3])
+
+"""
+Constantly makes get requests to get token
+"""
+def get_token(url: str, mac_addr: str):
+    payload = {'mac': mac_addr}
+    response = requests.get(url, params=payload)
+
+    while response.status_code != 200:
+        print('Trying to acquire token')
+        sleep(10)
+        response = requests.get(url, params=payload)
+    
+    f = open('/home/ricc/token', 'w')
+    f.write(response.text)
