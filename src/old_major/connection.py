@@ -7,7 +7,7 @@ import threading
 from time import sleep
 from getmac import get_mac_address
 
-from . import LedDebugger
+from .led_debugger import LedDebugger
 
 DEBUG = LedDebugger()
 
@@ -114,5 +114,18 @@ def get_token(url: str, mac_addr: str):
         sleep(10)
         response = requests.get(url, params=payload)
     
+    DEBUG.neutral
+    sleep(1)
     f = open('/home/ricc/token', 'w')
     f.write(response.text)
+    DEBUG.success
+
+
+"""
+Let the server know the central is online
+"""
+def signup(url: str, mac_addr: str):
+    msg = json.dumps({'mac_address': mac_addr})
+    response = requests.post(url, json=msg)
+
+    return response

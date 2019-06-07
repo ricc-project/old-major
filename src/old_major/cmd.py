@@ -3,7 +3,7 @@ import os
 
 from getmac import get_mac_address
 
-from .connection import WSConnection, watch_for_collects, get_token, monitor
+from .connection import WSConnection, watch_for_collects, get_token, monitor, signup
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
                         nargs='?', default='eth0')
 
     parser.add_argument('directory', type=str, help='directory where sensor data is saved',
-                        nargs='?', default='/home/ricc/data')
+                        nargs='?', default='~/ricc/data')
     
     args = parser.parse_args()
 
@@ -27,11 +27,12 @@ def main():
             os.makedirs(args.directory)
 
         ws_url = 'ws://' + args.host + '/ws/?mac=' + mac_addr
-        http_url = args.host + 'call'
+        http_url = 'http://' + args.host
         print('ws ', ws_url)
         print('http ', http_url)
+        signup(http_url+'/sign_central', mac_addr)
         connection = WSConnection(ws_url, args.interface)
         connection.start_connection()
-        monitor(args.directory, http_url, mac_addr)
+        monitor(args.directory, (http_url + '/call'), mac_addr)
     else:
         print("Invalid internet interface, couldn't get device mac address")
