@@ -6,7 +6,7 @@ here = path.abspath(path.dirname(__file__))
 setup(
     name='old-major',
 
-    version='0.0.11',
+    version='0.0.13',
 
     description='RICC project central system',
 

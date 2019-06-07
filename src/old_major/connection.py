@@ -7,7 +7,7 @@ import threading
 from time import sleep
 from getmac import get_mac_address
 
-from .led_Debugger import LedDebugger
+from .led_debugger import LedDebugger
 
 DEBUG = LedDebugger()
 
@@ -117,7 +117,7 @@ def get_token(url: str, mac_addr: str):
     
     DEBUG.neutral()
     sleep(1)
-    f = open('/home/ricc/token', 'w')
+    f = open('/home/pi/ricc/token', 'w')
     f.write(response.text)
     DEBUG.success()
 

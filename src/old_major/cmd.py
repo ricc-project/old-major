@@ -16,7 +16,7 @@ def main():
                         nargs='?', default='eth0')
 
     parser.add_argument('directory', type=str, help='directory where sensor data is saved',
-                        nargs='?', default='/home/ricc/data')
+                        nargs='?', default='/home/pi/ricc/data')
     
     args = parser.parse_args()
 
