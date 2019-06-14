@@ -22,6 +22,11 @@ def main():
 
     mac_addr = get_mac_address(args.interface)
     
+    while not mac_addr:
+        print('Waiting for internet connection')
+        mac_addr = get_mac_address(args.interface)
+        sleep(5)
+
     if mac_addr:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
