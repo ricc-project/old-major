@@ -1,6 +1,7 @@
 import argparse
 import os
 
+from time import sleep
 from getmac import get_mac_address
 
 from .connection import WSConnection, watch_for_collects, get_token, monitor, signup
