@@ -108,12 +108,12 @@ Constantly makes get requests to get token
 def get_token(url: str, mac_addr: str):
     formated_mac = mac_addr.replace(':', '-')
     payload = {'mac': formated_mac}
-    response = requests.get(url, params=payload)
+    response = requests.get(url, params=payload, timeout=20)
 
     while response.status_code != 200:
         print('Trying to acquire token')
         sleep(10)
-        response = requests.get(url, params=payload)
+        response = requests.get(url, params=payload, timeout=20)
     
     DEBUG.neutral()
     sleep(1)
@@ -128,7 +128,7 @@ Let the server know the central is online
 def signup(url: str, mac_addr: str):
     headers = {"content-type": "application/json"}
     msg = json.dumps({'mac_address': mac_addr})
-    response = requests.post(url, data=msg, headers=headers)
+    response = requests.post(url, data=msg, headers=headers, timeout=20)
     
     if response.status_code == 201:
         DEBUG.neutral()
