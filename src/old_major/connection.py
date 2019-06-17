@@ -123,7 +123,7 @@ def watch_for_collects(directory: str, mac_addr: str):
                 if(r.status_code == 200):
                     print('sended data')
                 else:
-                    print(f' error {r.status_code}')
+                    print('error '+ str(r.status_code))
 
 
 """
