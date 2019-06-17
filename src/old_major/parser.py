@@ -20,5 +20,5 @@ def parse(data):
             'solar_radiation'
         )
     )
-    
-    return reader
+    out = json.dumps([row for row in reader])
+    return out

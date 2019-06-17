@@ -108,18 +108,20 @@ def watch_for_collects(directory: str, mac_addr: str):
             if event_type[0] == 'IN_CLOSE_WRITE':
                 fpath = event[2]
                 fname = event[3]
-
+                full_path = (fpath + '/' + fname)
                 station_id, timestamp = fname[:-4].split('_')
                 headers = {"content-type": "application/json"}
-                partial_msg = dict(parse(fpath + fname))
+                partial_msg = {}
+                partial_msg['data'] = json.loads(parse(full_path))[0]
                 partial_msg['auth_token'] = token
                 partial_msg['central'] = mac_addr
                 partial_msg['name'] = station_id
-                partial_msg['timestamp'] = timestamp 
+                partial_msg['timestamp'] = timestamp
+                print(partial_msg)
 
                 msg = json.dumps(partial_msg)
-                while requests.post(url, data=msg, headers=headers, timeout=20) != 200:
-                    sleep(600)
+                requests.post(url, data=msg, headers=headers, timeout=20)
+                #sleep(600)
                 print('sended data')
 
 
