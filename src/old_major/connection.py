@@ -8,6 +8,7 @@ from time import sleep
 from getmac import get_mac_address
 
 from .led_debugger import LedDebugger
+from .parser import parse
 
 DEBUG = LedDebugger()
 
@@ -81,7 +82,7 @@ def send_http_data(url: str, token: str, data: dict):
     return response.status
 
 def monitor(directory, url, mac_addr):
-    watch_thread = threading.Thread(target=watch_for_collects, args=(directory,))    
+    watch_thread = threading.Thread(target=watch_for_collects, args=(directory, mac_addr))    
     token_thread = threading.Thread(target=get_token, args=(url, mac_addr))
     
     watch_thread.start()
@@ -90,7 +91,13 @@ def monitor(directory, url, mac_addr):
 """
 Watch for new collects and send to the API.
 """
-def watch_for_collects(directory: str):
+def watch_for_collects(directory: str, mac_addr: str):
+    url = 'http://164.41.98.14/send_data/'
+
+    token_file = open('/home/pi/ricc/token', 'r')
+    token = token_file.readline()
+    token_file.close()
+
     i = inotify.adapters.Inotify()
 
     i.add_watch(directory)
@@ -99,8 +106,21 @@ def watch_for_collects(directory: str):
         if event:
             event_type = event[1]
             if event_type[0] == 'IN_CLOSE_WRITE':
-                print('path ' + event[2])
-                print('name ' + event[3])
+                fpath = event[2]
+                fname = event[3]
+
+                station_id, timestamp = fname[:-4].split('_')
+                headers = {"content-type": "application/json"}
+                partial_msg = dict(parse(fpath + fname))
+                partial_msg['auth_token'] = token
+                partial_msg['central'] = mac_addr
+                partial_msg['name'] = station_id
+                partial_msg['timestamp'] = timestamp 
+
+                msg = json.dumps(partial_msg)
+                while requests.post(url, data=msg, headers=headers, timeout=20) != 200:
+                    sleep(600)
+
 
 """
 Constantly makes get requests to get token
@@ -119,6 +139,7 @@ def get_token(url: str, mac_addr: str):
     sleep(1)
     f = open('/home/pi/ricc/token', 'w')
     f.write(response.text)
+    f.close()
     DEBUG.success()
 
 
