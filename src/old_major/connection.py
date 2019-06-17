@@ -120,6 +120,7 @@ def watch_for_collects(directory: str, mac_addr: str):
                 msg = json.dumps(partial_msg)
                 while requests.post(url, data=msg, headers=headers, timeout=20) != 200:
                     sleep(600)
+                print('sended data')
 
 
 """
@@ -138,7 +139,8 @@ def get_token(url: str, mac_addr: str):
     DEBUG.neutral()
     sleep(1)
     f = open('/home/pi/ricc/token', 'w')
-    f.write(response.text)
+    json_data = json.loads(response.text)
+    f.write(json_data['auth_token'])
     f.close()
     DEBUG.success()
 
