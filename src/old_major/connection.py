@@ -3,6 +3,7 @@ import requests
 import json
 import inotify.adapters
 import threading
+import os
 
 from time import sleep
 from getmac import get_mac_address
@@ -111,19 +112,27 @@ def watch_for_collects(directory: str, mac_addr: str):
                 full_path = (fpath + '/' + fname)
                 station_id, timestamp = fname[:-4].split('_')
                 headers = {"content-type": "application/json"}
-                partial_msg = {}
-                partial_msg['data'] = parse(full_path)
-                partial_msg['auth_token'] = token
-                partial_msg['central'] = mac_addr
-                partial_msg['name'] = station_id
-                partial_msg['timestamp'] = timestamp
+                partial_msg = {
+                    'data': parse(full_path),
+                    'auth_token': token,
+                    'central': mac_addr,
+                    'name': station_id,
+                    'timestamp': timestamp
+                }
 
                 msg = json.dumps(partial_msg)
                 r = requests.post(url, data=msg, headers=headers, timeout=20)
-                if(r.status_code == 200):
+                
+                if(r.status_code == 200 or r.status_code == 201):
                     print('sended data')
+                    os.remove(full_path)
                 else:
                     print('error '+ str(r.status_code))
+                    for i in range(10):
+                        sleep(3600)
+                        r = requests.post(url, data=msg, headers=headers, timeout=20)
+                        if(r.status_code == 200 or r.status_code == 201):
+                            break
 
 
 """
