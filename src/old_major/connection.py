@@ -112,17 +112,18 @@ def watch_for_collects(directory: str, mac_addr: str):
                 station_id, timestamp = fname[:-4].split('_')
                 headers = {"content-type": "application/json"}
                 partial_msg = {}
-                partial_msg['data'] = json.loads(parse(full_path))[0]
+                partial_msg['data'] = parse(full_path)
                 partial_msg['auth_token'] = token
                 partial_msg['central'] = mac_addr
                 partial_msg['name'] = station_id
                 partial_msg['timestamp'] = timestamp
-                print(partial_msg)
 
                 msg = json.dumps(partial_msg)
-                requests.post(url, data=msg, headers=headers, timeout=20)
-                #sleep(600)
-                print('sended data')
+                r = requests.post(url, data=msg, headers=headers, timeout=20)
+                if(r.status_code == 200):
+                    print('sended data')
+                else:
+                    print(f' error {r.status_code}')
 
 
 """
