@@ -133,6 +133,9 @@ def watch_for_collects(directory: str, mac_addr: str):
                     if(r.status_code == 200 or r.status_code == 201):
                         print('Data was sended successfully!\n')
                         os.remove(full_path)
+                        DEBUG.neutral()
+                        sleep(1)
+                        DEBUG.success()
                     else:
                         t = threading.Thread(target=resend_data, args=(url, msg, headers))
                         t.start()
