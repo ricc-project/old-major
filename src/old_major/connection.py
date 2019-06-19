@@ -133,7 +133,7 @@ def watch_for_collects(directory: str, mac_addr: str):
                     if(r.status_code == 200 or r.status_code == 201):
                         print('Data was sended successfully!\n')
                         os.remove(full_path)
-                    elif r.status_code == 503:
+                    else:
                         t = threading.Thread(target=resend_data, args=(url, msg, headers))
                         t.start()
 
@@ -141,12 +141,15 @@ def watch_for_collects(directory: str, mac_addr: str):
 Try to send a msg with sensor data 5 times.
 """
 def resend_data(url, msg, headers):
-    for i in range(5):
+    for i in range(10):
         print('Resending data\n')
-        r = requests.post(url, data=msg, headers=headers, timeout=20)
-        if(r.status_code == 200 or r.status_code == 201):
-            break
-        sleep(1800)
+        try:
+            r = requests.post(url, data=msg, headers=headers, timeout=20)
+            if(r.status_code == 200 or r.status_code == 201):
+                break
+            sleep(1800)
+        except requests.exceptions.RequestException as e:
+            sleep(1800)
 
 
 """
@@ -155,20 +158,27 @@ Constantly makes get requests to get token
 def get_token(url: str, mac_addr: str):
     formated_mac = mac_addr.replace(':', '-')
     payload = {'mac': formated_mac}
-    response = requests.get(url, params=payload, timeout=20)
-
-    while response.status_code != 200:
-        print('Trying to acquire token')
-        sleep(10)
-        response = requests.get(url, params=payload, timeout=20)
+    while True:
+        try:
+            response = requests.get(url, params=payload, timeout=20)
+            while response.status_code != 200:
+                print('Trying to acquire token')
+                sleep(10)
+                response = requests.get(url, params=payload, timeout=20)
     
-    DEBUG.neutral()
-    sleep(1)
-    f = open('/home/pi/ricc/token', 'w')
-    json_data = json.loads(response.text)
-    f.write(json_data['auth_token'])
-    f.close()
-    DEBUG.success()
+            DEBUG.neutral()
+            sleep(1)
+            f = open('/home/pi/ricc/token', 'w')
+            json_data = json.loads(response.text)
+            f.write(json_data['auth_token'])
+            f.close()
+            DEBUG.success()
+        except requests.exceptions.RequestException as e:
+            print('T
+            ('Failed to get token, device without internet conection, retraying!\n')
+            sleep(30)
+
+    
 
 
 """
@@ -177,11 +187,16 @@ Let the server know the central is online
 def signup(url: str, mac_addr: str):
     headers = {"content-type": "application/json"}
     msg = json.dumps({'mac_address': mac_addr})
-    response = requests.post(url, data=msg, headers=headers, timeout=20)
     
-    if response.status_code == 201:
-        DEBUG.neutral()
-        sleep(1)
-        DEBUG.success()
+    while True:
+        try:
+            response = requests.post(url, data=msg, headers=headers, timeout=20)
+            if response.status_code == 201:
+                DEBUG.neutral()
+                sleep(1)
+                DEBUG.success()
 
-    return response
+            return response
+        except requests.exceptions.RequestException as e:
+            ('Failed to signup, device without internet conection, retraying!\n')
+            sleep(30)
