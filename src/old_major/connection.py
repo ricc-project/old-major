@@ -173,6 +173,7 @@ def get_token(url: str, mac_addr: str):
             f.write(json_data['auth_token'])
             f.close()
             DEBUG.success()
+            break
         except requests.exceptions.RequestException as e:
             print('Failed to get token, device without internet conection, retraying!\n')
             sleep(30)
