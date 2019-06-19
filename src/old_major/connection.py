@@ -45,7 +45,7 @@ class WSConnection:
     def _switch_actuator(self):
         # send message to mesh network
         self.actuator_on = not self.actuator_on
-        with open(ACTUATOR_FILE) as actuator_file:
+        with open(ACTUATOR_FILE, 'w') as actuator_file:
             if self.actuator_on:
                 actuator_file.write('1')
             else:
@@ -131,15 +131,22 @@ def watch_for_collects(directory: str, mac_addr: str):
                     r = requests.post(url, data=msg, headers=headers, timeout=20)
 
                     if(r.status_code == 200 or r.status_code == 201):
-                        print('sended data')
+                        print('Data was sended successfully!\n')
                         os.remove(full_path)
-                    else:
-                        print('error '+ str(r.status_code))
-                        # for i in range(10):
-                        #     sleep(3600)
-                        #     r = requests.post(url, data=msg, headers=headers, timeout=20)
-                        #     if(r.status_code == 200 or r.status_code == 201):
-                        #         break
+                    elif r.status_code == 503:
+                        t = threading.Thread(target=resend_data, args=(url, msg, headers))
+                        t.start()
+
+"""
+Try to send a msg with sensor data 5 times.
+"""
+def resend_data(url, msg, headers):
+    for i in range(5):
+        print('Resending data\n')
+        r = requests.post(url, data=msg, headers=headers, timeout=20)
+        if(r.status_code == 200 or r.status_code == 201):
+            break
+        sleep(1800)
 
 
 """
