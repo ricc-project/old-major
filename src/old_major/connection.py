@@ -12,6 +12,7 @@ from .led_debugger import LedDebugger
 from .parser import parse
 
 DEBUG = LedDebugger()
+ACTUATOR_FILE = '/home/pi/ricc/actuator'
 
 class WSConnection:
 
@@ -44,7 +45,9 @@ class WSConnection:
     def _switch_actuator(self):
         # send message to mesh network
         self.actuator_on = not self.actuator_on
-    
+        with open(ACTUATOR_FILE) as actuator_file:
+            actuator_file.write(self.actuator_on)
+
     def _on_open(self):
         print('Connected')
         DEBUG.success()
@@ -110,31 +113,32 @@ def watch_for_collects(directory: str, mac_addr: str):
                 fpath = event[2]
                 fname = event[3]
                 full_path = (fpath + '/' + fname)
-                station_id, timestamp = fname[:-4].split('_')
-                headers = {"content-type": "application/json"}
-                partial_msg = {
-                    'data': parse(full_path),
-                    'auth_token': token,
-                    'central': mac_addr,
-                    'name': station_id,
-                    'timestamp': timestamp
-                }
-
-                msg = json.dumps(partial_msg)
-                r = requests.post(url, data=msg, headers=headers, timeout=20)
-                
-                if(r.status_code == 200 or r.status_code == 201):
-                    print('sended data')
-                    os.remove(full_path)
-                else:
-                    print('error '+ str(r.status_code))
-                    for i in range(10):
-                        sleep(3600)
-                        r = requests.post(url, data=msg, headers=headers, timeout=20)
-                        if(r.status_code == 200 or r.status_code == 201):
-                            break
-
-
+                if os.path.getsize(full_path):
+                    station_id, timestamp = fname[:-4].split('_')
+                    headers = {"content-type": "application/json"}
+                    partial_msg = {
+                        'data': parse(full_path),
+                        'auth_token': token,
+                        'central': mac_addr,
+                        'name': station_id,
+                        'timestamp': timestamp
+                    }
+    
+                    msg = json.dumps(partial_msg)
+                    r = requests.post(url, data=msg, headers=headers, timeout=20)
+                    
+                    if(r.status_code == 200 or r.status_code == 201):
+                        print('sended data')
+                        os.remove(full_path)
+                    else:
+                        print('error '+ str(r.status_code))
+                        for i in range(10):
+                            sleep(3600)
+                            r = requests.post(url, data=msg, headers=headers, timeout=20)
+                            if(r.status_code == 200 or r.status_code == 201):
+                                break
+    
+    
 """
 Constantly makes get requests to get token
 """
