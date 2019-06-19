@@ -123,22 +123,22 @@ def watch_for_collects(directory: str, mac_addr: str):
                         'name': station_id,
                         'timestamp': timestamp
                     }
-    
+
                     msg = json.dumps(partial_msg)
                     r = requests.post(url, data=msg, headers=headers, timeout=20)
-                    
+
                     if(r.status_code == 200 or r.status_code == 201):
                         print('sended data')
                         os.remove(full_path)
                     else:
                         print('error '+ str(r.status_code))
-                        for i in range(10):
-                            sleep(3600)
-                            r = requests.post(url, data=msg, headers=headers, timeout=20)
-                            if(r.status_code == 200 or r.status_code == 201):
-                                break
-    
-    
+                        # for i in range(10):
+                        #     sleep(3600)
+                        #     r = requests.post(url, data=msg, headers=headers, timeout=20)
+                        #     if(r.status_code == 200 or r.status_code == 201):
+                        #         break
+
+
 """
 Constantly makes get requests to get token
 """
