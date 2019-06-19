@@ -166,13 +166,11 @@ def get_token(url: str, mac_addr: str):
                 sleep(10)
                 response = requests.get(url, params=payload, timeout=20)
     
-            DEBUG.neutral()
             sleep(1)
             f = open('/home/pi/ricc/token', 'w')
             json_data = json.loads(response.text)
             f.write(json_data['auth_token'])
             f.close()
-            DEBUG.success()
             break
         except requests.exceptions.RequestException as e:
             print('Failed to get token, device without internet conection, retraying!\n')
@@ -192,9 +190,7 @@ def signup(url: str, mac_addr: str):
         try:
             response = requests.post(url, data=msg, headers=headers, timeout=20)
             if response.status_code == 201:
-                DEBUG.neutral()
                 sleep(1)
-                DEBUG.success()
 
             return response
         except requests.exceptions.RequestException as e:
