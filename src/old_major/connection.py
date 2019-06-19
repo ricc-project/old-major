@@ -46,7 +46,10 @@ class WSConnection:
         # send message to mesh network
         self.actuator_on = not self.actuator_on
         with open(ACTUATOR_FILE) as actuator_file:
-            actuator_file.write(self.actuator_on)
+            if self.actuator_on:
+                actuator_file.write('1')
+            else:
+                actuator_file.write('0')
 
     def _on_open(self):
         print('Connected')
