@@ -174,8 +174,7 @@ def get_token(url: str, mac_addr: str):
             f.close()
             DEBUG.success()
         except requests.exceptions.RequestException as e:
-            print('T
-            ('Failed to get token, device without internet conection, retraying!\n')
+            print('Failed to get token, device without internet conection, retraying!\n')
             sleep(30)
 
     
