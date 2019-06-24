@@ -14,7 +14,6 @@ from .parser import parse
 DEBUG = LedDebugger()
 ACTUATOR_FILE = '/home/pi/ricc/actuator'
 
-i = inotify.adapters.Inotify()
 
 class WSConnection:
 
@@ -111,6 +110,7 @@ def watch_for_collects(directory: str, mac_addr: str):
     token = token_file.readline()
     token_file.close()
 
+    i = inotify.adapters.Inotify()
     i.add_watch(directory)
 
     for event in i.event_gen():
@@ -206,7 +206,9 @@ def signup(url: str, mac_addr: str):
 
 def watch_for_register(directory: str, mac_addr: str):
     url = 'http://164.41.98.14/create_station/'
-    headers = {"content-type": "application/json"}    
+    headers = {"content-type": "application/json"}
+
+    i = inotify.adapters.Inotify()
     i.add_watch(directory)
 
     for event in i.event_gen():
@@ -225,11 +227,16 @@ def watch_for_register(directory: str, mac_addr: str):
                     }
                 )
                 response = requests.post(url, data=msg, headers=headers, timeout=20)
-                if response.status == 201:
+                if response.status_code == 201:
                     print('Registered ' + station_name)
                     os.remove(full_path)
+<<<<<<< HEAD
 
 
 def auth_token():
     with open('/home/pi/ricc/token', 'r') as f:
         return f.readline()
+=======
+                else:
+                    print('error ' + str(response.status_code))
+>>>>>>> ec67cc35b03411b7eeb523c2b3520d7462ac873c
