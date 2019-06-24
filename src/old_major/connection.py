@@ -217,8 +217,19 @@ def watch_for_register(directory: str, mac_addr: str):
                 fname = event[3]
                 station_name = fname.split('_')[1]
                 full_path = (fpath + '/' + fname)
-                msg = json.dumps({'central': mac_addr, 'name': station_name})
+                msg = json.dumps(
+                    {
+                        'auth_token': auth_token(),
+                        'central': mac_addr,
+                        'name': station_name
+                    }
+                )
                 response = requests.post(url, data=msg, headers=headers, timeout=20)
                 if response.status == 201:
                     print('Registered ' + station_name)
                     os.remove(full_path)
+
+
+def auth_token():
+    with open('/home/pi/ricc/token', 'r') as f:
+        return f.readline()
