@@ -93,7 +93,7 @@ def send_http_data(url: str, token: str, data: dict):
 
 def monitor(directory, url, mac_addr):
     watch_data_thread = threading.Thread(target=watch_for_collects, args=(directory, mac_addr))    
-    watch_register_thread = threading.Thread(target=watch_for_register, args=('/home/pi/ricc/dev',)) 
+    watch_register_thread = threading.Thread(target=watch_for_register, args=('/home/pi/ricc/dev', mac_addr)) 
     token_thread = threading.Thread(target=get_token, args=(url, mac_addr))
     
     watch_data_thread.start()
@@ -204,7 +204,9 @@ def signup(url: str, mac_addr: str):
             sleep(30)
 
 
-def watch_for_register(directory: str):
+def watch_for_register(directory: str, mac_addr: str):
+    url = 'http://164.41.98.14/create_station/'
+    headers = {"content-type": "application/json"}    
     i.add_watch(directory)
 
     for event in i.event_gen():
@@ -213,6 +215,10 @@ def watch_for_register(directory: str):
             if event_type[0] == 'IN_CLOSE_WRITE':
                 fpath = event[2]
                 fname = event[3]
+                station_name = fname.split('_')[1]
                 full_path = (fpath + '/' + fname)
-                print('Registered ' + fname.split('_')[1])
-                os.remove(full_path)
+                msg = json.dumps({'central': mac_addr, 'name': station_name})
+                response = requests.post(url, data=msg, headers=headers, timeout=20)
+                if response.status == 201:
+                    print('Registered ' + station_name)
+                    os.remove(full_path)
