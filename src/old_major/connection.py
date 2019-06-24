@@ -230,13 +230,8 @@ def watch_for_register(directory: str, mac_addr: str):
                 if response.status_code == 201:
                     print('Registered ' + station_name)
                     os.remove(full_path)
-<<<<<<< HEAD
 
 
 def auth_token():
     with open('/home/pi/ricc/token', 'r') as f:
         return f.readline()
-=======
-                else:
-                    print('error ' + str(response.status_code))
->>>>>>> ec67cc35b03411b7eeb523c2b3520d7462ac873c
