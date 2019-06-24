@@ -14,6 +14,8 @@ from .parser import parse
 DEBUG = LedDebugger()
 ACTUATOR_FILE = '/home/pi/ricc/actuator'
 
+i = inotify.adapters.Inotify()
+
 class WSConnection:
 
     SWITCH_SUCCESS = json.dumps({'message': 200})
@@ -91,7 +93,7 @@ def send_http_data(url: str, token: str, data: dict):
 
 def monitor(directory, url, mac_addr):
     watch_data_thread = threading.Thread(target=watch_for_collects, args=(directory, mac_addr))    
-    watch_register_thread = threading.Thread(target=watch_for_register, args=('/home/pi/ricc/dev')) 
+    watch_register_thread = threading.Thread(target=watch_for_register, args=('/home/pi/ricc/dev',)) 
     token_thread = threading.Thread(target=get_token, args=(url, mac_addr))
     
     watch_data_thread.start()
@@ -108,8 +110,6 @@ def watch_for_collects(directory: str, mac_addr: str):
     token_file = open('/home/pi/ricc/token', 'r')
     token = token_file.readline()
     token_file.close()
-
-    i = inotify.adapters.Inotify()
 
     i.add_watch(directory)
 
@@ -205,7 +205,6 @@ def signup(url: str, mac_addr: str):
 
 
 def watch_for_register(directory: str):
-    i = inotify.adapters.Inotify()
     i.add_watch(directory)
 
     for event in i.event_gen():
@@ -213,6 +212,7 @@ def watch_for_register(directory: str):
             event_type = event[1]
             if event_type[0] == 'IN_CLOSE_WRITE':
                 fpath = event[2]
-                fname = event[3].split('_')[1]
+                fname = event[3]
                 full_path = (fpath + '/' + fname)
-                print('Registered ' + fname)
+                print('Registered ' + fname.split('_')[1])
+                os.remove(full_path)
