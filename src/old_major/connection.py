@@ -88,12 +88,16 @@ def send_http_data(url: str, token: str, data: dict):
     
     return response.status
 
+
 def monitor(directory, url, mac_addr):
-    watch_thread = threading.Thread(target=watch_for_collects, args=(directory, mac_addr))    
+    watch_data_thread = threading.Thread(target=watch_for_collects, args=(directory, mac_addr))    
+    watch_register_thread = threading.Thread(target=watch_for_register, args=('/home/pi/ricc/dev')) 
     token_thread = threading.Thread(target=get_token, args=(url, mac_addr))
     
-    watch_thread.start()
+    watch_data_thread.start()
+    watch_register_thread.start()
     token_thread.start()
+
 
 """
 Watch for new collects and send to the API.
@@ -140,6 +144,7 @@ def watch_for_collects(directory: str, mac_addr: str):
                         t = threading.Thread(target=resend_data, args=(url, msg, headers))
                         t.start()
 
+
 """
 Try to send a msg with sensor data 5 times.
 """
@@ -179,8 +184,6 @@ def get_token(url: str, mac_addr: str):
             print('Failed to get token, device without internet conection, retraying!\n')
             sleep(30)
 
-    
-
 
 """
 Let the server know the central is online
@@ -199,3 +202,17 @@ def signup(url: str, mac_addr: str):
         except requests.exceptions.RequestException as e:
             ('Failed to signup, device without internet conection, retraying!\n')
             sleep(30)
+
+
+def watch_for_register(directory: str):
+    i = inotify.adapters.Inotify()
+    i.add_watch(directory)
+
+    for event in i.event_gen():
+        if event:
+            event_type = event[1]
+            if event_type[0] == 'IN_CLOSE_WRITE':
+                fpath = event[2]
+                fname = event[3].split('_')[1]
+                full_path = (fpath + '/' + fname)
+                print('Registered ' + fname)
