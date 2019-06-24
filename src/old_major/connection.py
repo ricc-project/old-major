@@ -230,6 +230,8 @@ def watch_for_register(directory: str, mac_addr: str):
                 if response.status_code == 201:
                     print('Registered ' + station_name)
                     os.remove(full_path)
+                else:
+                    print('Error ' + str(response.status_code))
 
 
 def auth_token():
