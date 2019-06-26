@@ -215,7 +215,7 @@ def watch_for_register(directory: str, mac_addr: str):
         for d in devices:
             if d not in previous_devices:
                 station_name = d.split('_')[1]
-                full_path = directory + d
+                full_path = directory + '/' + d
                 msg = json.dumps(
                     {
                         'auth_token': auth_token(),
