@@ -104,7 +104,7 @@ def monitor(directory, url, mac_addr):
 Watch for new collects and send to the API.
 """
 def watch_for_collects(directory: str, mac_addr: str):
-    url = 'http://164.41.98.14/send_data/'
+    url = 'http://snowball.lappis.rocks/send_data/'
 
     token_file = open('/home/pi/ricc/token', 'r')
     token = token_file.readline()
@@ -205,7 +205,7 @@ def signup(url: str, mac_addr: str):
 
 
 def watch_for_register(directory: str, mac_addr: str):
-    url = 'http://164.41.98.14/create_station/'
+    url = 'http://snowball.lappis.rocks/create_station/'
     headers = {"content-type": "application/json"}
 
     i = inotify.adapters.Inotify()
