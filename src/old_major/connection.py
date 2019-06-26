@@ -229,6 +229,7 @@ def watch_for_register(directory: str, mac_addr: str):
                     os.remove(full_path)
                 else:
                     print('Error ' + str(response.status_code))
+        previous_devices = devices
 
 # def watch_for_register(directory: str, mac_addr: str):
 #     url = 'http://snowball.lappis.rocks/create_station/'
