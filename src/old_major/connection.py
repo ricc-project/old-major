@@ -134,13 +134,22 @@ def watch_for_collects(directory: str, mac_addr: str):
                     msg = json.dumps(partial_msg)
                     r = requests.post(url, data=msg, headers=headers, timeout=20)
 
+                    if station_id == '2':
+                        #calculo evapotranspiração                    
+                        calc = data['moisture1']
+
+                        if calc < 50:
+                            # liga bomba de água se estiver seco
+                            with open(ACTUATOR_FILE, 'w') as actuator_file:
+                                actuator_file.write('1')
+
                     if(r.status_code == 200 or r.status_code == 201):
                         print('Data was sended successfully!\n')
                         os.remove(full_path)
                         DEBUG.neutral()
                         sleep(1)
                         DEBUG.success()
-                    else:
+                    elif r.status_code == 500:
                         t = threading.Thread(target=resend_data, args=(url, msg, headers))
                         t.start()
 
