@@ -239,7 +239,7 @@ def watch_for_register(directory: str, mac_addr: str):
                         'name': station_name
                     }
                 )
-                response = requests.post(url, data=msg, headers=headers, timeout=20)
+                response = requests.post(create_station_url, data=msg, headers=headers, timeout=20)
                 if response.status_code == 201:
                     print('Station registered ' + station_name)
                 else:
