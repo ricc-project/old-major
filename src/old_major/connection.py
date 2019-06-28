@@ -205,8 +205,10 @@ def signup(url: str, mac_addr: str):
 
 
 def watch_for_register(directory: str, mac_addr: str):
-    create_url = 'http://snowball.lappis.rocks/create_station/'
-    status_url = 'http://snowball.lappis.rocks/station_status/'
+    create_station_url = 'http://snowball.lappis.rocks/create_station/'
+    create_actuator_url = 'http://snowball.lappis.rocks/create_actuator/'
+    status_url = 'http://snowball.lappis.rocks/node_status/'
+    
     headers = {"content-type": "application/json"}
 
     previous_devices = []
@@ -214,7 +216,7 @@ def watch_for_register(directory: str, mac_addr: str):
         sleep(5)
         devices = os.listdir(directory)
         for d in previous_devices:
-            if d not in devices
+            if d not in devices:
                 station_name = d.split('_')[1]
                 msg = json.dumps(
                     {
