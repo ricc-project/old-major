@@ -200,7 +200,7 @@ def signup(url: str, mac_addr: str):
 
             return response
         except requests.exceptions.RequestException as e:
-            ('Failed to signup, device without internet conection, retraying!\n')
+            print('Failed to signup, device without internet conection, retraying!\n')
             sleep(30)
 
 
