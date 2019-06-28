@@ -134,15 +134,6 @@ def watch_for_collects(directory: str, mac_addr: str):
                     msg = json.dumps(partial_msg)
                     r = requests.post(url, data=msg, headers=headers, timeout=20)
 
-                    if station_id == '2':
-                        #calculo evapotranspiração                    
-                        calc = data['moisture1']
-
-                        if calc < 50:
-                            # liga bomba de água se estiver seco
-                            with open(ACTUATOR_FILE, 'w') as actuator_file:
-                                actuator_file.write('1')
-
                     if(r.status_code == 200 or r.status_code == 201):
                         print('Data was sended successfully!\n')
                         os.remove(full_path)
@@ -153,6 +144,20 @@ def watch_for_collects(directory: str, mac_addr: str):
                         t = threading.Thread(target=resend_data, args=(url, msg, headers))
                         t.start()
 
+                    if station_id == '2':
+                        #calculo evapotranspiração                    
+                        calc = data['moisture1']
+
+                        #tempo de irrigação ligada
+                        uptime = data['moisture1'] + data['moisture2']
+
+                        if calc < 50:
+                            # liga bomba de água se estiver seco
+                            with open(ACTUATOR_FILE, 'w') as actuator_file:
+                                actuator_file.write('1')
+                                sleep(uptime)
+                                actuator_file.write('0')
+                      
 
 """
 Try to send a msg with sensor data 5 times.
