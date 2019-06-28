@@ -205,17 +205,31 @@ def signup(url: str, mac_addr: str):
 
 
 def watch_for_register(directory: str, mac_addr: str):
-    url = 'http://snowball.lappis.rocks/create_station/'
+    create_url = 'http://snowball.lappis.rocks/create_station/'
+    status_url = 'http://snowball.lappis.rocks/station_status/'
     headers = {"content-type": "application/json"}
 
     previous_devices = []
     while True:
         sleep(5)
         devices = os.listdir(directory)
+        for d in previous_devices:
+            if d not in devices
+                station_name = d.split('_')[1]
+                msg = json.dumps(
+                    {
+                        'auth_token': auth_token(),
+                        'central': mac_addr,
+                        'name': station_name
+                    }
+                )
+                response = requests.post(status_url, data=msg, headers=headers, timeout=20)
+                if response.status_code == 200:
+                    print('Station ' + station_name + ' has leaved the mesh network')
+
         for d in devices:
             if d not in previous_devices:
                 station_name = d.split('_')[1]
-                full_path = directory + '/' + d
                 msg = json.dumps(
                     {
                         'auth_token': auth_token(),
@@ -225,40 +239,12 @@ def watch_for_register(directory: str, mac_addr: str):
                 )
                 response = requests.post(url, data=msg, headers=headers, timeout=20)
                 if response.status_code == 201:
-                    print('Registered ' + station_name)
-                    os.remove(full_path)
+                    print('Station registered ' + station_name)
                 else:
-                    print('Error ' + str(response.status_code))
+                    print('Station ' + station_name + ' already registered')
+                    requests.post(status_url, data=msg, headers=headers, timeout=20)
+
         previous_devices = devices
-
-# def watch_for_register(directory: str, mac_addr: str):
-#     url = 'http://snowball.lappis.rocks/create_station/'
-#     headers = {"content-type": "application/json"}
-
-#     i = inotify.adapters.Inotify()
-#     i.add_watch(directory)
-
-#     for event in i.event_gen():
-#         if event:
-#             event_type = event[1]
-#             if event_type[0] == 'IN_CLOSE_WRITE':
-#                 fpath = event[2]
-#                 fname = event[3]
-#                 station_name = fname.split('_')[1]
-#                 full_path = (fpath + '/' + fname)
-#                 msg = json.dumps(
-#                     {
-#                         'auth_token': auth_token(),
-#                         'central': mac_addr,
-#                         'name': station_name
-#                     }
-#                 )
-#                 response = requests.post(url, data=msg, headers=headers, timeout=20)
-#                 if response.status_code == 201:
-#                     print('Registered ' + station_name)
-#                     os.remove(full_path)
-#                 else:
-#                     print('Error ' + str(response.status_code))
 
 
 def auth_token():
