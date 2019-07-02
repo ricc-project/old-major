@@ -28,7 +28,7 @@ def parse(data):
             'moisture1': data_json['moisture1'],
             'moisture2': data_json['moisture2'],
             'moisture3': data_json['moisture3'],
-            'temprature': data_json['temperature']
+            'temperature': data_json['temperature']
         },
         'air': {
             'humidity': data_json['air_humidity'],
