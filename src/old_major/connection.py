@@ -160,6 +160,7 @@ def watch_for_collects(directory: str, mac_addr: str):
                         if calc < 50 and can_irrigate:
                             # liga bomba de água se estiver seco
                             with open(ACTUATOR_FILE, 'w') as actuator_file:
+                                print('Automatic switching the actuator')
                                 actuator_file.write('1')
                                 sleep(uptime)
                                 actuator_file.write('0')
