@@ -149,9 +149,7 @@ def watch_for_collects(directory: str, mac_addr: str):
                         t.start()
                     
                     # actuator node
-                    if station_id == '1':
-                        
-                    elif station_id == '2':
+                    if station_id == '2':
                         #calculo evapotranspiração               
                         calc = float(collect_data['soil']['moisture1'])
 
@@ -186,7 +184,7 @@ def control_actuator(actuator_file, uptime, actuator_on):
             sleep(uptime)
             actuator.write('0')
             print('Turning off actuator')
-    
+
 
 """
 Try to send a msg with sensor data 5 times.
@@ -282,7 +280,12 @@ def watch_for_register(directory: str, mac_addr: str):
                         'name': station_name
                     }
                 )
-                response = requests.post(create_station_url, data=msg, headers=headers, timeout=20)
+                # actuator node
+                if station_name == '1':
+                    response = requests.post(create_actuator_url, data=msg, headers=headers, timeout=20)
+                else:
+                    response = requests.post(create_station_url, data=msg, headers=headers, timeout=20)
+
                 if response.status_code == 201:
                     print('Station registered ' + station_name)
                 else:
