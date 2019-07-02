@@ -106,6 +106,7 @@ def monitor(directory, url, mac_addr):
 Watch for new collects and send to the API.
 """
 def watch_for_collects(directory: str, mac_addr: str):
+    global ACTUATOR_ON 
     url = 'http://snowball.lappis.rocks/send_data/'
     irrigation_url = 'http://snowball.lappis.rocks/irrigation/'
 
@@ -163,10 +164,10 @@ def watch_for_collects(directory: str, mac_addr: str):
 
                         print('Automatic irrigation is not enabled') if not can_irrigate else ...
 
-                        if calc < 50 and can_irrigate and not global ACTUATOR_ON:
+                        if calc < 50 and can_irrigate and not ACTUATOR_ON:
                             t = threading.Thread(target=control_actuator, args=(ACTUATOR_FILE, uptime))
                             t.start()
-                            global ACTUATOR_ON = True
+                            ACTUATOR_ON = True
                             # liga bomba de água se estiver seco
                             # with open(ACTUATOR_FILE, 'w') as actuator_file:
                             #     print('Turning on actuator')
@@ -177,14 +178,15 @@ def watch_for_collects(directory: str, mac_addr: str):
 
 
 def control_actuator(actuator_file, uptime):
-    if not global ACTUATOR_ON:
+    global ACTUATOR_ON
+    if not ACTUATOR_ON:
         with open(actuator_file, 'w') as actuator:
             print('Turning on actuator')
             actuator.write('1')
             sleep(uptime)
             actuator.write('0')
             print('Turning off actuator')
-            global ACTUATOR_ON = False
+            ACTUATOR_ON = False
 
 """
 Try to send a msg with sensor data 5 times.
