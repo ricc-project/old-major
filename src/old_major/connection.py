@@ -155,7 +155,7 @@ def watch_for_collects(directory: str, mac_addr: str):
 
                         creds = json.dumps({'auth_token': token, 'central': mac_addr})
                         response = requests.post(irrigation_url, data=creds, timeout=20)
-                        response_json = json.dumps((json.loads(response.text)))
+                        response_json = json.loads(response.text)
                         can_irrigate = response_json['auto_irrigation']
 
                         print('Automatic irrigation is not enabled') if not can_irrigate else ...
