@@ -91,9 +91,9 @@ def send_http_data(url: str, token: str, data: dict):
 
 
 def monitor(directory, url, mac_addr):
+    token_thread = threading.Thread(target=get_token, args=(url, mac_addr))
     watch_data_thread = threading.Thread(target=watch_for_collects, args=(directory, mac_addr))    
     watch_register_thread = threading.Thread(target=watch_for_register, args=('/home/pi/ricc/dev', mac_addr)) 
-    token_thread = threading.Thread(target=get_token, args=(url, mac_addr))
     
     watch_data_thread.start()
     watch_register_thread.start()
@@ -113,6 +113,8 @@ def watch_for_collects(directory: str, mac_addr: str):
 
     i = inotify.adapters.Inotify()
     i.add_watch(directory)
+
+    actuator_on = False
 
     for event in i.event_gen():
         if event:
@@ -145,8 +147,11 @@ def watch_for_collects(directory: str, mac_addr: str):
                     elif r.status_code == 500:
                         t = threading.Thread(target=resend_data, args=(url, msg, headers))
                         t.start()
-
-                    if station_id == '2':
+                    
+                    # actuator node
+                    if station_id == '1':
+                        
+                    elif station_id == '2':
                         #calculo evapotranspiração               
                         calc = float(collect_data['soil']['moisture1'])
 
@@ -160,15 +165,28 @@ def watch_for_collects(directory: str, mac_addr: str):
 
                         print('Automatic irrigation is not enabled') if not can_irrigate else ...
 
-                        if calc < 50 and can_irrigate:
+                        if calc < 50 and can_irrigate and not actuator_on:
+                            actuator_on = True
+                            t = threading.Thread(target=control_actuator, args=(ACTUATOR_FILE, uptime, actuator_on))
+                            t.start()
                             # liga bomba de água se estiver seco
-                            with open(ACTUATOR_FILE, 'w') as actuator_file:
-                                print('Turning on actuator')
-                                actuator_file.write('1')
-                                sleep(uptime)
-                                actuator_file.write('0')
-                                print('Turning off actuator')
+                            # with open(ACTUATOR_FILE, 'w') as actuator_file:
+                            #     print('Turning on actuator')
+                            #     actuator_file.write('1')
+                            #     sleep(uptime)
+                            #     actuator_file.write('0')
+                            #     print('Turning off actuator')f actuator')
 
+
+def control_actuator(actuator_file, uptime, actuator_on):
+    if not actuator_on:
+        with open(actuator_file, 'w') as actuator:
+            print('Turning on actuator')
+            actuator.write('1')
+            sleep(uptime)
+            actuator.write('0')
+            print('Turning off actuator')
+    
 
 """
 Try to send a msg with sensor data 5 times.
