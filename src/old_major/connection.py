@@ -155,7 +155,7 @@ def watch_for_collects(directory: str, mac_addr: str):
 
                         creds = json.dumps({'auth_token': token, 'central': mac_addr})
                         response = requests.post(irrigation_url, data=creds, timeout=20)
-                        can_irrigate = json.loads(response.text)['auto_irrigation']
+                        can_irrigate = bool(json.loads(response.text)['auto_irrigation'])
 
                         if calc < 50 and can_irrigate:
                             # liga bomba de água se estiver seco
