@@ -145,9 +145,8 @@ def watch_for_collects(directory: str, mac_addr: str):
                         # DEBUG.neutral()
                         sleep(1)
                         # DEBUG.success()
-                    elif r.status_code == 500:
-                        t = threading.Thread(target=resend_data, args=(url, msg, headers))
-                        t.start()
+                    else:
+                        print('error sendind ' + str(r.status_code))
                     
                     # actuator node
                     if station_id == '2':
