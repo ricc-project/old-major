@@ -292,6 +292,7 @@ def watch_for_register(directory: str, mac_addr: str):
                 else:
                     print('Station ' + station_name + ' already registered')
                     requests.post(status_url, data=msg, headers=headers, timeout=20)
+                    print('Station ' + station_name + ' entered in the network')
 
         previous_devices = devices
 
