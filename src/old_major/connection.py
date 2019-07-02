@@ -148,10 +148,10 @@ def watch_for_collects(directory: str, mac_addr: str):
 
                     if station_id == '2':
                         #calculo evapotranspiração               
-                        calc = int(collect_data['soil']['moisture1'])
+                        calc = float(collect_data['soil']['moisture1'])
 
                         #tempo de irrigação ligada
-                        uptime = int(collect_data['soil']['moisture1']) + int(collect_data['soil']['moisture2'])
+                        uptime = float(collect_data['soil']['moisture1']) + float(collect_data['soil']['moisture2'])
 
                         creds = json.dumps({'auth_token': token, 'central': mac_addr})
                         response = requests.post(irrigation_url, data=creds, timeout=20)
