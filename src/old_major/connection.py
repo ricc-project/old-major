@@ -157,8 +157,8 @@ def watch_for_collects(directory: str, mac_addr: str):
                         response = requests.post(irrigation_url, data=creds, timeout=20)
                         can_irrigate = bool(json.loads(response.text)['auto_irrigation'])
 
-                        print('Automatic irrigation is not enabled') if not can_irrigate
-                        
+                        print('Automatic irrigation is not enabled') if not can_irrigate else ...
+
                         if calc < 50 and can_irrigate:
                             # liga bomba de água se estiver seco
                             with open(ACTUATOR_FILE, 'w') as actuator_file:
