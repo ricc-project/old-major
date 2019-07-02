@@ -8,10 +8,10 @@ import os
 from time import sleep
 from getmac import get_mac_address
 
-from .led_debugger import LedDebugger
+# from .led_debugger import LedDebugger
 from .parser import parse
 
-DEBUG = LedDebugger()
+# DEBUG = LedDebugger()
 ACTUATOR_FILE = '/home/pi/ricc/actuator'
 
 
@@ -54,26 +54,26 @@ class WSConnection:
 
     def _on_open(self):
         print('Connected')
-        DEBUG.success()
+        # DEBUG.success()
 
     def _on_message(self, message):
         print('Switching actuator')
-        DEBUG.neutral()
+        # DEBUG.neutral()
         sleep(1)
         self._switch_actuator()
         self.socket.send(self.SWITCH_SUCCESS)
-        DEBUG.success()
+        # DEBUG.success()
 
     def _on_error(self, error):
         print('Error "' + error + '"')
-        DEBUG.failed()
+        # DEBUG.failed()
         sleep(5)
         print('Retrying')
         self.start_connection()
 
     def _on_close(self):
         print("Connection lost")
-        DEBUG.failed()
+        # DEBUG.failed()
         sleep(5)
         print('Trying to stabilish connection')
         self.start_connection()
@@ -105,6 +105,7 @@ Watch for new collects and send to the API.
 """
 def watch_for_collects(directory: str, mac_addr: str):
     url = 'http://snowball.lappis.rocks/send_data/'
+    irrigation_url = 'http://snowball.lappis.rocks/irrigation/'
 
     token_file = open('/home/pi/ricc/token', 'r')
     token = token_file.readline()
@@ -120,11 +121,12 @@ def watch_for_collects(directory: str, mac_addr: str):
                 fpath = event[2]
                 fname = event[3]
                 full_path = (fpath + '/' + fname)
+                collect_data = parse(full_path)
                 if os.path.getsize(full_path):
                     station_id, timestamp = fname[:-4].split('_')
                     headers = {"content-type": "application/json"}
                     partial_msg = {
-                        'data': parse(full_path),
+                        'data': collect_data,
                         'auth_token': token,
                         'central': mac_addr,
                         'name': station_id,
@@ -137,27 +139,31 @@ def watch_for_collects(directory: str, mac_addr: str):
                     if(r.status_code == 200 or r.status_code == 201):
                         print('Data was sended successfully!\n')
                         os.remove(full_path)
-                        DEBUG.neutral()
+                        # DEBUG.neutral()
                         sleep(1)
-                        DEBUG.success()
+                        # DEBUG.success()
                     elif r.status_code == 500:
                         t = threading.Thread(target=resend_data, args=(url, msg, headers))
                         t.start()
 
                     if station_id == '2':
-                        #calculo evapotranspiração                    
-                        calc = data['moisture1']
+                        #calculo evapotranspiração               
+                        calc = collect_data['moisture1']
 
                         #tempo de irrigação ligada
-                        uptime = data['moisture1'] + data['moisture2']
+                        uptime = collect_data['moisture1'] + collect_data['moisture2']
 
-                        if calc < 50:
+                        creds = json.dumps({'auth_token': token, 'central': mac_addr})
+                        response = requests.post(irrigation_url, data=creds, timeout=20)
+                        can_irrigate = json.loads(response.text)['auto_irrigation']
+
+                        if calc < 50 and can_irrigate:
                             # liga bomba de água se estiver seco
                             with open(ACTUATOR_FILE, 'w') as actuator_file:
                                 actuator_file.write('1')
                                 sleep(uptime)
                                 actuator_file.write('0')
-                      
+
 
 """
 Try to send a msg with sensor data 5 times.
