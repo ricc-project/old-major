@@ -148,10 +148,10 @@ def watch_for_collects(directory: str, mac_addr: str):
 
                     if station_id == '2':
                         #calculo evapotranspiração               
-                        calc = collect_data['soil']['moisture1']
+                        calc = int(collect_data['soil']['moisture1'])
 
                         #tempo de irrigação ligada
-                        uptime = collect_data['soil']['moisture1'] + collect_data['soil']['moisture2']
+                        uptime = int(collect_data['soil']['moisture1']) + int(collect_data['soil']['moisture2'])
 
                         creds = json.dumps({'auth_token': token, 'central': mac_addr})
                         response = requests.post(irrigation_url, data=creds, timeout=20)
@@ -160,10 +160,11 @@ def watch_for_collects(directory: str, mac_addr: str):
                         if calc < 50 and can_irrigate:
                             # liga bomba de água se estiver seco
                             with open(ACTUATOR_FILE, 'w') as actuator_file:
-                                print('Automatic switching the actuator')
+                                print('Turning on actuator')
                                 actuator_file.write('1')
                                 sleep(uptime)
                                 actuator_file.write('0')
+                                print('Turning off actuator')
 
 
 """
