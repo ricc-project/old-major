@@ -348,6 +348,7 @@ def watch_for_register(directory: str, mac_addr: str):
 
     previous_devices = []
     while True:
+        sleep(1)
         devices = os.listdir(directory)
 
         for d in devices:
