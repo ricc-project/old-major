@@ -14,7 +14,7 @@ setup(
 
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
 
-    install_requires=['websocket_client', 'getmac', 'requests', 'inotify'],
+    install_requires=['websocket_client', 'getmac', 'requests', 'inotify', 'numpy'],
 
     entry_points={
         'console_scripts': [
