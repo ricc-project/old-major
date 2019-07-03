@@ -120,19 +120,17 @@ def watch_for_collects(directory: str, mac_addr: str):
     token = token_file.readline()
     token_file.close()
 
-    i = inotify.adapters.Inotify()
-    i.add_watch(directory)
+    prev_data = []
 
-    for event in i.event_gen():
-        if event:
-            event_type = event[1]
-            if event_type[0] == 'IN_CLOSE_WRITE':
-                fpath = event[2]
-                fname = event[3]
-                full_path = (fpath + '/' + fname)
+    while True:
+        sleep(1)
+        cur_data = os.listdir(directory)
+        for data in cur_data:
+            if data not in prev_data:
+                full_path = (directory + '/' + data)
                 collect_data = parse(full_path)
                 if os.path.getsize(full_path):
-                    station_id, timestamp = fname[:-4].split('_')
+                    station_id, timestamp = data[:-4].split('_')
                     headers = {"content-type": "application/json"}
                     partial_msg = {
                         'data': collect_data,
@@ -146,15 +144,13 @@ def watch_for_collects(directory: str, mac_addr: str):
                     r = requests.post(url, data=msg, headers=headers, timeout=20)
 
                     if(r.status_code == 200 or r.status_code == 201):
-                        print('Data was sended successfully!\n')
+                        print('Data of ' + str(station_id) + ' was sended successfully!\n')
                         os.remove(full_path)
-                        # DEBUG.neutral()
-                        sleep(1)
-                        # DEBUG.success()
                     else:
-                        print('error sendind ' + str(r.status_code))
+                        print('Error ' + '"' + str(r.status_code) + '"' +' sendind data of ' + str(station_id))
+    
                     
-                    # actuator node
+
                     if station_id == '3' or station_id == '2':
                         soil_moisture = float(collect_data['soil']['moisture1'])
 
@@ -187,6 +183,79 @@ def watch_for_collects(directory: str, mac_addr: str):
                             uptime = dt
                             print('UPTIME ' + str(uptime))
                             turn_on_actuator(uptime)
+
+                            Etc = 0
+                            Pluv = 0
+        
+        prev_data = cur_data
+    
+    # i = inotify.adapters.Inotify()
+    # i.add_watch(directory)
+
+    # for event in i.event_gen():
+    #     if event:
+    #         event_type = event[1]
+    #         if event_type[0] == 'IN_CLOSE_WRITE':
+    #             fpath = event[2]
+    #             fname = event[3]
+    #             full_path = (fpath + '/' + fname)
+    #             collect_data = parse(full_path)
+    #             if os.path.getsize(full_path):
+    #                 station_id, timestamp = fname[:-4].split('_')
+    #                 headers = {"content-type": "application/json"}
+    #                 partial_msg = {
+    #                     'data': collect_data,
+    #                     'auth_token': token,
+    #                     'central': mac_addr,
+    #                     'name': station_id,
+    #                     'timestamp': timestamp
+    #                 }
+
+    #                 msg = json.dumps(partial_msg)
+    #                 r = requests.post(url, data=msg, headers=headers, timeout=20)
+
+    #                 if(r.status_code == 200 or r.status_code == 201):
+    #                     print('Data was sended successfully!\n')
+    #                     os.remove(full_path)
+    #                     # DEBUG.neutral()
+    #                     sleep(1)
+    #                     # DEBUG.success()
+    #                 else:
+    #                     print('error sendind ' + str(r.status_code))
+                    
+    #                 # actuator node
+    #                 if station_id == '3' or station_id == '2':
+    #                     soil_moisture = float(collect_data['soil']['moisture1'])
+
+    #                     air_temperature = float(collect_data['air']['temperature'])
+    #                     air_preessure = float(collect_data['air']['pressure'])
+    #                     air_humidity = float(collect_data['air']['humidity'])
+    #                     wind_speed = float(collect_data['wind']['speed'])
+    #                     solar_rad = float(collect_data['solar']['radiation'])
+    #                     rain_fall = float(collect_data['rain']['rainfall'])
+                        
+    #                     Etc += evapotranspiration(air_temperature, air_preessure, air_humidity, wind_speed, solar_rad)
+    #                     print('ETC ' + str(Etc))
+                        
+    #                     Pluv += rain_fall
+    #                     print('PLUV ' + str(Pluv))
+
+    #                     creds = json.dumps({'auth_token': token, 'central': mac_addr})
+    #                     response = requests.post(irrigation_url, data=creds, timeout=20)
+    #                     response_json = json.loads(response.text)
+    #                     can_irrigate = True if response_json['auto_irrigation'] == 'True' else False
+
+    #                     print('Automatic irrigation is not enabled') if not can_irrigate else ...
+
+    #                     if soil_moisture < 50 and can_irrigate:
+    #                         print('ETC ' + str(Etc))
+    #                         I = Etc - Pluv
+    #                         Q = 4000 / 3600.0
+    #                         dt = I / Q
+
+    #                         uptime = dt
+    #                         print('UPTIME ' + str(uptime))
+    #                         turn_on_actuator(uptime)
                             # with open(ACTUATOR_FILE, 'wr') as actuator_file:
                             #     actuator_file.readline()
                             #     print('Turning on actuator')
@@ -195,8 +264,8 @@ def watch_for_collects(directory: str, mac_addr: str):
                             #     actuator_file.write('0')
                             #     print('Turning off actuator')
 
-                            Etc = 0
-                            Pluv = 0
+                            # Etc = 0
+                            # Pluv = 0
 
 
 async def turn_on_actuator(uptime):
