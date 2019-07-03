@@ -110,6 +110,8 @@ def monitor(directory, url, mac_addr):
 Watch for new collects and send to the API.
 """
 def watch_for_collects(directory: str, mac_addr: str):
+    Etc = 0
+    Pluv = 0
     # global ACTUATOR_ON/ 
     url = 'http://snowball.lappis.rocks/send_data/'
     irrigation_url = 'http://snowball.lappis.rocks/irrigation/'
@@ -153,7 +155,7 @@ def watch_for_collects(directory: str, mac_addr: str):
                         print('error sendind ' + str(r.status_code))
                     
                     # actuator node
-                    if station_id == '2':
+                    if station_id == '3' or station_id == '2':
                         soil_moisture = float(collect_data['soil']['moisture1'])
 
                         air_temperature = float(collect_data['air']['temperature'])
@@ -161,13 +163,13 @@ def watch_for_collects(directory: str, mac_addr: str):
                         air_humidity = float(collect_data['air']['humidity'])
                         wind_speed = float(collect_data['wind']['speed'])
                         solar_rad = float(collect_data['solar']['radiation'])
-                        rain_fall = collect_data['rain']['rainfall']
+                        rain_fall = float(collect_data['rain']['rainfall'])
                         
                         Etc += evapotranspiration(air_temperature, air_preessure, air_humidity, wind_speed, solar_rad)
                         print('ETC ' + str(Etc))
                         
                         Pluv += rain_fall
-                        print('PLUV ' + str(PLUV))
+                        print('PLUV ' + str(Pluv))
 
                         creds = json.dumps({'auth_token': token, 'central': mac_addr})
                         response = requests.post(irrigation_url, data=creds, timeout=20)
@@ -277,7 +279,7 @@ def watch_for_register(directory: str, mac_addr: str):
 
     previous_devices = []
     while True:
-        sleep(5)
+        sleep(0.5)
         devices = os.listdir(directory)
         for d in previous_devices:
             if d not in devices:
@@ -293,6 +295,7 @@ def watch_for_register(directory: str, mac_addr: str):
                 if response.status_code == 200:
                     print('Station ' + station_name + ' has leaved the mesh network')
 
+        previous_devices = devices
         for d in devices:
             if d not in previous_devices:
                 station_name = d.split('_')[1]
