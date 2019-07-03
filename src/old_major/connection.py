@@ -14,8 +14,6 @@ from .parser import parse
 # DEBUG = LedDebugger()
 ACTUATOR_FILE = '/home/pi/ricc/actuator'
 
-ACTUATOR_ON = False
-
 
 class WSConnection:
 
@@ -106,7 +104,7 @@ def monitor(directory, url, mac_addr):
 Watch for new collects and send to the API.
 """
 def watch_for_collects(directory: str, mac_addr: str):
-    global ACTUATOR_ON 
+    # global ACTUATOR_ON/ 
     url = 'http://snowball.lappis.rocks/send_data/'
     irrigation_url = 'http://snowball.lappis.rocks/irrigation/'
 
@@ -163,7 +161,7 @@ def watch_for_collects(directory: str, mac_addr: str):
 
                         print('Automatic irrigation is not enabled') if not can_irrigate else ...
 
-                        if calc < 50 and can_irrigate and not ACTUATOR_ON:
+                        if calc < 50 and can_irrigate:
                             with open(ACTUATOR_FILE, 'w') as actuator_file:
                                 print('Turning on actuator')
                                 actuator_file.write('1')
