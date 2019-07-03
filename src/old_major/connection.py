@@ -301,7 +301,7 @@ def watch_for_register(directory: str, mac_addr: str):
                     print('Station registered ' + station_name)
                 else:
                     print('Station ' + station_name + ' entered in the network')
-                    requests.post(status_url, data=msg, headers=headers, timeout=20)
+                    requests.post(status_url+"on/", data=msg, headers=headers, timeout=20)
 
         for d in previous_devices:
             if d not in devices:
@@ -313,7 +313,7 @@ def watch_for_register(directory: str, mac_addr: str):
                         'name': station_name
                     }
                 )
-                response = requests.post(status_url, data=msg, headers=headers, timeout=20)
+                response = requests.post(status_url+"off/", data=msg, headers=headers, timeout=20)
                 if response.status_code == 200:
                     print('Station ' + station_name + ' has leaved the mesh network')
                 else:
