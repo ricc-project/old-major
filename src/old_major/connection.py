@@ -279,23 +279,8 @@ def watch_for_register(directory: str, mac_addr: str):
 
     previous_devices = []
     while True:
-        sleep(0.5)
         devices = os.listdir(directory)
-        for d in previous_devices:
-            if d not in devices:
-                station_name = d.split('_')[1]
-                msg = json.dumps(
-                    {
-                        'auth_token': auth_token(),
-                        'central': mac_addr,
-                        'name': station_name
-                    }
-                )
-                response = requests.post(status_url, data=msg, headers=headers, timeout=20)
-                if response.status_code == 200:
-                    print('Station ' + station_name + ' has leaved the mesh network')
 
-        previous_devices = devices
         for d in devices:
             if d not in previous_devices:
                 station_name = d.split('_')[1]
@@ -315,9 +300,24 @@ def watch_for_register(directory: str, mac_addr: str):
                 if response.status_code == 201:
                     print('Station registered ' + station_name)
                 else:
-                    print('Station ' + station_name + ' already registered')
-                    requests.post(status_url, data=msg, headers=headers, timeout=20)
                     print('Station ' + station_name + ' entered in the network')
+                    requests.post(status_url, data=msg, headers=headers, timeout=20)
+
+        for d in previous_devices:
+            if d not in devices:
+                station_name = d.split('_')[1]
+                msg = json.dumps(
+                    {
+                        'auth_token': auth_token(),
+                        'central': mac_addr,
+                        'name': station_name
+                    }
+                )
+                response = requests.post(status_url, data=msg, headers=headers, timeout=20)
+                if response.status_code == 200:
+                    print('Station ' + station_name + ' has leaved the mesh network')
+                else:
+                    print('Error changing station status ' + str(response.status_code))
 
         previous_devices = devices
 
